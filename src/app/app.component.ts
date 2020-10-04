@@ -7,19 +7,31 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'webworkerapp';
-
+  worker:any;
   longProcessOutput:string="Long\nprocess\noutput\nwill\nappear\nhere\n";
 
+  /**
+   *
+   */
+  constructor() {
+    if (typeof Worker !== 'undefined') {
+      // Create a new
+     this.worker = new Worker('./app.worker', { type: 'module' });
+      this.worker.onmessage = ({ data }) => {
+        console.log('OnMessage');
+          this.longProcessOutput+=`${data}` + "\n";
+      };
+     
+    } else {
+      console.log("Web Worker are not supported by your browser");
+    }
+    
+  }
   longLoop()
   {
+    console.log('longLoop Called');
     this.longProcessOutput="";
-    for (let x = 1; x < 1000000000; x++) {
-      let y=x/3.2;
-      if((x%20000000)==0)
-      {
-        this.longProcessOutput+=x + "\n";
-        console.log(x);
-      }
-    }
+    this.worker.postMessage('start looping...');
   }
 }
+
